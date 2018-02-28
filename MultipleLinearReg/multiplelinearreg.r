@@ -9,7 +9,7 @@ library(tidyr)
 library(xtable)
 set.seed(200)
 
-n<-50 # number of observations
+n<-50 # number of observation
 # simulate model matrix
 x<-cbind(1, rnorm(n, 0, 1), rnorm(n, 5,10),rnorm(n, 100,10))
 
