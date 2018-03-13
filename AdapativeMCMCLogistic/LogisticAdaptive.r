@@ -101,7 +101,7 @@ sample_amh<-function(X, Y, iter, jump_v,
   for(i in 2:iter){
     beta_0 <- beta_shell[i-1, ]
     
-    if(i >= ad_start & i <= ad_stop ){
+    if(i >= ad_start & i%%ad_int==0 & i <= ad_stop ){
       accept_rate <- mean(accept_shell[  (i - ad_period):i ])
       s <- s * (accept_rate/.234) # optimal acceptance rate
       jump_v <- s * cov(beta_shell[ (i - ad_period):(i-1) , ])
@@ -137,32 +137,39 @@ sample_amh<-function(X, Y, iter, jump_v,
 iter <- 10000
 p <- ncol(X)
 
-res <- sample_mh(X, Y, iter = iter, jump_v = .01)
-gibbs_res <- res[[1]]
-plot(cumsum(res[[2]])/1:iter, type='l')
+res_mh <- sample_mh(X, Y, iter = iter, jump_v = .01)
+samples_mh <- res_mh[[1]]
 
 
-res <- sample_amh(X, Y, iter = iter, jump_v = diag(p), 
-                  ad_start = 102, ad_stop = 500, ad_int = 100, ad_period = 100)
-gibbs_res <- res[[1]]
-plot(cumsum(res[[2]])/1:iter, type='l')
-
+res_amh <- sample_amh(X, Y, iter = iter, jump_v = diag(p), 
+                      ad_start = 102, ad_stop = 500, 
+                      ad_int = 100, ad_period = 100)
+samples_amh <- res_amh[[1]]
 
 ################################################################################
 ### 3 - Plot Results
 ################################################################################
 
+par(mfrow=c(1,1))
+plot(cumsum(res_mh[[2]])/1:iter, type='l')
+lines(cumsum(res_amh[[2]])/1:iter, col='red')
+
+
 par(mfrow=c(2,2))
-plot(gibbs_res[,1],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
-     main='Intercept')
+plot(samples_mh[,1],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
+     main='Intercept', col='gray')
+lines(samples_amh[,1], col='black')
 abline(h=-1,col='red')
-plot(gibbs_res[,2],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
-     main='Age1')
+plot(samples_mh[,2],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
+     main='Age1', col='gray')
+lines(samples_amh[,2], col='black')
 abline(h=.7,col='red')
-plot(gibbs_res[,3],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
-     main='Age2')
+plot(samples_mh[,3],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
+     main='Age2', col='gray')
+lines(samples_amh[,3], col='black')
 abline(h=1.1,col='red')
-plot(gibbs_res[,4],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
-     main='Treatment')
+plot(samples_mh[,4],type='l',xlab='MCMC Iterations',ylab=c('Coefficient Draw'),
+     main='Treatment', col='gray')
+lines(samples_amh[,4], col='black')
 abline(h=1.1,col='red')
 
