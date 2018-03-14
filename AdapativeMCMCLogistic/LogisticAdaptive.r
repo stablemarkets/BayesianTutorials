@@ -1,10 +1,11 @@
 #Author: Arman Oganisian
-
 library(LaplacesDemon)
 library(invgamma)
 library(MASS)
-library(profvis)
-
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+setwd("/Users/arman/Documents/StableMarkets/BayesianTutorials/AdapativeMCMCLogistic")
 ################################################################################
 ### 0 - Simulate Data 
 ################################################################################
@@ -25,6 +26,10 @@ Y<-matrix(d$y, ncol=1) # outcome vector
 
 p<-ncol(X)
 
+log_post(c(1,1,1,1), Y, X)
+
+log_posterior(c(1,1,1,1), X, Y)
+
 ################################################################################
 ### 1 - functions to sample from conditional posterior distributions
 ################################################################################
@@ -40,7 +45,7 @@ log_posterior<-function(beta, X, Y){
   lik <- sum(dbern(Y, p_i, log = T))
   
   # calculate prior 
-  pr <- dnorm(x = beta, mean = 0, sd = 1000, log = T)
+  pr <- dmvn(x = beta, mu = rep(0,p), Sigma = (1000^2)*diag(p), log = T)
   
   log_cond_post <- lik + pr
   return(log_cond_post)
@@ -80,7 +85,8 @@ sample_mh<-function(X, Y, iter, jump_v){
     accept_shell[i] <- rmin
     
   }
-  
+  colnames(beta_shell) <- colnames(X)
+  colnames(beta_shell)[1] <- 'intercept'
   return(list(beta_shell, accept_shell) )
 }
 
@@ -127,6 +133,8 @@ sample_amh<-function(X, Y, iter, jump_v,
     
   }
   
+  colnames(beta_shell) <- colnames(X)
+  colnames(beta_shell)[1] <- 'intercept'
   return(list(beta_shell, accept_shell) )
 }
 
@@ -134,21 +142,40 @@ sample_amh<-function(X, Y, iter, jump_v,
 ################################################################################
 ### 2 - Run Sampler
 ################################################################################
-iter <- 10000
+iter <- 5000
 p <- ncol(X)
 
-res_mh <- sample_mh(X, Y, iter = iter, jump_v = .01)
+res_mh <- sample_mh(X, Y, iter = iter, jump_v = .05)
 samples_mh <- res_mh[[1]]
 
+samples_mh_long <- data.frame(samples_mh) %>% 
+  mutate(iter = 1:iter) %>%
+  gather( Beta, Draw, intercept:trt) %>%
+  mutate(Sampler='MH')
 
 res_amh <- sample_amh(X, Y, iter = iter, jump_v = diag(p), 
                       ad_start = 102, ad_stop = 500, 
                       ad_int = 100, ad_period = 100)
 samples_amh <- res_amh[[1]]
 
+samples_amh_long <- data.frame(samples_amh) %>% 
+  mutate(iter = 1:iter) %>%
+  gather( Beta, Draw, intercept:trt) %>%
+  mutate(Sampler='Adaptive MH')
+
+all_samples <- bind_rows(samples_mh_long, samples_amh_long) %>%
+  mutate(Beta = as.factor(Beta), Sampler = as.factor(Sampler)) %>%
+  filter(iter>1000)
+
 ################################################################################
 ### 3 - Plot Results
 ################################################################################
+
+ggplot(all_samples, aes(x=iter, y = Draw, col=Sampler)) +
+  geom_line() +
+  facet_grid(Beta~.)
+
+
 
 par(mfrow=c(1,1))
 plot(cumsum(res_mh[[2]])/1:iter, type='l')
