@@ -22,8 +22,10 @@ double log_post(arma::vec b, arma::vec Y, arma::mat X) {
   double pr;
   double log_posterior;
   
+  // linear predictor
   xb =  X*b;
   
+  // correct for numerical issues
   for( int i=0; i<n; i++){
     if( xb[i] > 10 ){
       xb[i] = 10;
@@ -34,21 +36,24 @@ double log_post(arma::vec b, arma::vec Y, arma::mat X) {
     }
   } 
   
+  // apply inverse link function
   pi = invlogit(xb);
   
+  // compute log likelihood contribution of each observation
+  // and sum them
   lik = 0;
   for(int i=0; i<n; i++){
     lik = lik + R::dbinom(Y[i], 1, pi[i], 1);
   }
   
-  
+  // compute log prior contribution for each parameter
   pr=0;
   for(int i=0; i<p; i++){
     pr = pr + R::dnorm4(b[i], 0, 1000, 1);
   }
   
+  // evaluate log posterior as sum of likelihood and prior
   log_posterior = lik + pr;
-
   return log_posterior;
 }
 
