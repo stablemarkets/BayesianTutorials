@@ -187,10 +187,7 @@ for(i in 1:length(ss) ){
   rel_time[i] <- r_time/rcpp_time
 }
 
-################################################################################
-### 4 - Plot Results
-################################################################################
-
-plot(ss, rel_time, type='l')
+plot(ss, rel_time, type='l', 
+     xlab='Data Sample Size', ylab='Relative Runtime (R v. Rcpp)')
 
 
