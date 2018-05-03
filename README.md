@@ -8,4 +8,4 @@ In order of publication:
 2. [Blocked Gibbs for Bayesian Multivariate Linear Regression](https://stablemarkets.wordpress.com/2017/09/05/blocked-gibbs-sampling-in-r-for-bayesian-multiple-linear-regression/)
 3. [Metropolis Hastings-in-Gibbs Sampler for Bayesian Logistic Regression](https://stablemarkets.wordpress.com/2017/11/07/metropolis-in-gibbs-sampling-and-runtime-analysis-with-profviz/)
 4. [Using Rcpp to speed up Metropolis-Hastings](https://stablemarkets.wordpress.com/2018/03/16/speeding-up-metropolis-hastings-with-rcpp/)
-5. [Bayesian Inference with Backfitting MCMC](https://wordpress.com/post/stablemarkets.wordpress.com/2130)
+5. [Bayesian Inference with Backfitting MCMC](https://stablemarkets.wordpress.com/2018/05/03/bayesian-inference-with-backfitting-mcmc/)
