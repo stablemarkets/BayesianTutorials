@@ -103,7 +103,7 @@ tt <- post_dist[[2]] # extract posterior predictive
 png(filename = 'OriginalData.png')
 plot(xvec, y, 
      xlab = 'x', ylab='y', 
-     main='Posterior Mean Function fit using Backfitting MCMC', 
+     main='Simulated (x,y) Data', 
      ylim=c(-2500,1500), pch=20)
 dev.off()
 
