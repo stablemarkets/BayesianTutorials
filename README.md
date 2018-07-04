@@ -1,5 +1,5 @@
 # Bayesian Tutorials
-Please cite/link when sharing. Thanks! - Arman
+Please cite/link when sharing. Thanks - Arman
 
 This repository supports the series of blog posts on stablemarkets.wordpress.com that walk through MCMC implementation for various classes of Bayesian models.
 
