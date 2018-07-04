@@ -6,15 +6,15 @@ setwd("/Users/aoganisi/Dropbox/Stable Markets/BayesianTutorials/PartialPooling")
 ################################################################################
 set.seed(10)
 
-d_A<-rbinom(n = 5,  size = 1, prob =  .2)
+d_A<-rbinom(n = 10,  size = 1, prob =  .2)
 d_B<-rbinom(n = 100, size = 1, prob = .3)
-d_C<-rbinom(n = 5, size = 1, prob = .45)
+d_C<-rbinom(n = 10, size = 1, prob = .45)
 d_D<-rbinom(n = 100, size = 1, prob = .7)
-d_E<-rbinom(n = 5, size = 1, prob = .8)
+d_E<-rbinom(n = 10, size = 1, prob = .8)
 
 approve <- c(d_A, d_B, d_C, d_D, d_E)
-industry <- as.factor(c(rep('A', 5),  rep('B', 100), rep('C', 5),
-              rep('D', 100), rep('E', 5) ))
+industry <- as.factor(c(rep('A', 10),  rep('B', 100), rep('C', 10),
+              rep('D', 100), rep('E', 10) ))
 
 mod_mat <- model.matrix(lm(approve ~ industry))
 
@@ -98,10 +98,10 @@ pooled_p <- exp(pool_res$coefficients)/(1 + exp(pool_res$coefficients))
 #####                       Visualize Results                              #####
 ################################################################################
 
-
+png(filename = 'PartialPool.png')
 plot(partial_pool_p, pch=20, col='red', ylim=c(0,1), axes=F, 
      xlab='Industry', ylab='Probability of Merger')
-axis(1, at = 1:5, labels = paste0(unique(industry), " (n =",c(5,100,5,100,5),')' ) )
+axis(1, at = 1:5, labels = paste0(unique(industry), " (n =",c(10,100,10,100,10),')' ) )
 axis(2, at = seq(0,1,.2), labels= seq(0,1,.2) )
 
 points(1:5, no_pooled_p, pch=20, col='black')
@@ -110,7 +110,4 @@ abline(h=pooled_p, lty=2)
 legend('bottomright', 
        legend = c('Pooled Estimate','Stratified Estimates', 'Bayesian Estimate'),
        lty = c(2,NA,NA), col=c('black','black','red'), pch=c(NA, 20,20), bty='n')
-
-
-plot(c(5,100,5,100,5), partial_pool_p[,1] - no_pooled_p)
-
+dev.off()
