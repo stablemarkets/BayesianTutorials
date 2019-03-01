@@ -1,3 +1,5 @@
+## Author: Arman Oganisian
+
 # unnormalized log posterior of beta vector
 log_cond_post_beta<-function(beta, phi, lambda, X, Y){
   # calculate likelihood
@@ -15,7 +17,7 @@ log_cond_post_beta<-function(beta, phi, lambda, X, Y){
 }
 
 # use Metropolis Hastings algorithm to sample from cond. post. of beta
-mh_vanilla <- function(beta_0, phi, lambda, X, Y, mh_trials,jump_v){
+mh_vanilla <- function(beta_0, phi, lambda, X, Y, mh_trials,jump_v, p){
   
   accept <- 0
   post_draws <- matrix(data = NA, nrow = mh_trials, ncol = length(beta_0))
@@ -46,7 +48,7 @@ mh_vanilla <- function(beta_0, phi, lambda, X, Y, mh_trials,jump_v){
   return(list(post_draws=post_draws, accept=accept/mh_trials)  )
 }
 
-mh_cache <- function(beta_0, phi, lambda, X, Y, mh_trials,jump_v){
+mh_cache <- function(beta_0, phi, lambda, X, Y, mh_trials,jump_v, p){
   
   accept <- 0
   post_draws <- matrix(data = NA, nrow = mh_trials, ncol = length(beta_0))
