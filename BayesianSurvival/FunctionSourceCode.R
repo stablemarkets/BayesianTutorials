@@ -1,17 +1,21 @@
-log_post_a <- function(beta, b, X, survt){ # shape
-  
-  a <- exp( X %*% beta )
+log_post_beta <- function(beta, log_alpha, X, survt){ # shape
+  alpha <- exp(log_alpha)
+  mu <-  X %*% beta
+  lambda <- exp(-1*mu*alpha)
 
-  lik <- sum(dweibull( survt, shape = a, scale = exp(b), log=T))
+  lik <- sum(dweibull( survt, shape = alpha, scale = lambda, log=T))
   pr <- sum(dnorm(x = beta, mean = 0, sd = 100, log = T))
   return(lik + pr)
 }
 
-log_post_b <- function(b, beta, X, survt){ # scale
-  a <- exp( X %*% beta )
+log_post_alpha <- function(log_alpha, beta, X, survt){ # scale
+  alpha <- exp(log_alpha)
+  
+  mu <-  X %*% beta
+  lambda <- exp(-1*mu*alpha)
     
-  lik <- sum(dweibull( survt, shape = a, scale = exp(b), log=T))
-  pr <- dexp(x = exp(b), rate = 1, log = T)
+  lik <- sum(dweibull( survt, shape = alpha, scale = lambda, log=T))
+  pr <- dexp(x = alpha, rate = 1, log = T)
   return(lik + pr)
 }
 
