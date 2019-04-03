@@ -111,7 +111,7 @@ for(i in 2:iter){
     curve(1-post_ecdf(x), add=T, from=0, to=15, col='lightgray')
     
     # store hazard ratio
-    hazard_ratio[i-burnin] <- exp(-beta_shell[2]/alpha_curr)
+    hazard_ratio[i-burnin] <- exp(-beta_shell[2]*alpha_curr)
   }
   
 }
@@ -127,8 +127,8 @@ legend('topright',
        lty=c(1,0,1,0), pch=c(NA,15,NA,15), bty='n')
 
 plot(hazard_ratio, type='l')
-abline(h=exp(-true_beta[2]/true_alpha), col='red')
+abline(h=exp(-true_beta[2]*true_alpha), col='red')
 
 hist(hazard_ratio)
-abline(v=exp(-true_beta[2]/true_alpha), col='red')
+abline(v=exp(-true_beta[2]*true_alpha), col='red')
 
