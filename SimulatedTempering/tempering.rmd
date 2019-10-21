@@ -1,0 +1,184 @@
+---
+title: "Parallel Tempering"
+author: "Arman Oganisian"
+date: "10/20/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(latex2exp)
+
+knitr::opts_chunk$set(echo = FALSE)
+
+## compute constant of unnormalized density ftemp
+calc_k <- function(ftemp, temp){
+  k <- integrate(ftemp, lower=-Inf, upper=Inf, temp=temp)
+  return(k$value)
+}
+
+## one step of a metropolis update
+vanilla_mh <- function(log_target, theta_curr, prop_var){
+  theta_star <- rnorm(1, theta_curr, sqrt(prop_var) )
+  
+  log_accept_prob <- log_target(theta_star) - log_target(theta_curr)
+  accept <- runif(1) < exp(log_accept_prob)
+  if(accept){ return(theta_star) }else{ return(theta_curr)}
+}
+
+## tempered distribution for various temperature, temp.
+ftemp <- function(x, temp){
+  r<-( (1/3)*dnorm(x,-20,1) + (1/3)*dnorm(x,0,1) + (1/3)*dnorm(x,20,1))^(1/temp)
+  return(r)
+}
+```
+
+
+
+```{r,  echo=F, warning=FALSE, message=FALSE, error=FALSE, cache=T, fig.show='animate', fig.width=10, interval=1, fig.height=6, cache=FALSE, aniopts="loop", animation.hook='gifski', fig.align='center', echo=F, eval=T}
+
+tvals <- c(1, seq(5,50, 5))
+
+log_target <- function(x) log(ftemp(x, temp=1))
+
+for(t in tvals){
+  
+  plot.new()
+  plot.window(xlim=c(-30,30), ylim=c(0,.2))
+  axis(side = 1, at = seq(-30,30,5), labels=seq(-30,30,5))
+  
+  
+  curve(ftemp(x,temp=1), from = -30, to=30, ylim=c(0,.2), add=T, n = 500,
+        lwd=1.5)
+  
+  k <- calc_k(ftemp, t)
+  curve( (1/k)*ftemp(x,temp=t), from = -30, to=30, add=T, col='blue', n=500,
+         lwd=1.5)
+  
+  legend('topright',col=c('black','blue'),lty=c(1,1),bty='n', 
+         legend=c('Target', paste0('Tempered Distribution',"\n",'T = ',t)) )
+}
+
+```
+
+```{r,fig.width=10, fig.height=6,}
+
+  plot.new()
+  plot.window(xlim=c(-5,30), ylim=c(0,.2))
+  axis(side = 1, at = seq(-5,30,5), labels=seq(-5,30,5))
+
+  curve(ftemp(x,temp=1), add=T, from = -5, to=30, ylim=c(0,.2),n = 500,lwd=1.5)
+  curve(.2*dnorm(x,mean=17,sd=2), add=T, from=10, to=24, col='darkred', lwd=2)
+  segments(17, 0, 17, .2*dnorm(17,17,2))
+  segments(14, 0, 14, .2*dnorm(14,17,2))
+  text(14, .3*dnorm(14,17,2), expression(theta^p),cex=2 )
+  text(16.8, .22*dnorm(17,17,2), expression(theta^current),cex=2 )
+  
+  curve(.2*dnorm(x,mean=17,sd=5), add=T, from=0, to=30, col='pink', lwd=2)
+  segments(17, 0, 17, .2*dnorm(17,17,2))
+  segments(14, 0, 14, .2*dnorm(14,17,2))
+  
+```
+
+
+```{r,  echo=F, warning=FALSE, message=FALSE, error=FALSE, cache=T, fig.show='animate', fig.width=10, interval=1, fig.height=6, cache=FALSE, aniopts="loop", animation.hook='gifski', fig.align='center', echo=F, eval=T}
+
+iter <- 10000
+theta_shell <- numeric(iter)
+theta_shell[1] <- 7
+
+set.seed(1)
+for(i in 2:iter){
+  theta_shell[i] <- vanilla_mh(log_target = log_target, 
+                               prop_var = 20,
+                               theta_curr = theta_shell[i-1])
+  
+}
+
+par(mfrow=c(1,2))
+plot(theta_shell, type='l')
+hist(theta_shell, freq=F, xlim=c(-25,25), ylim=c(0,1), breaks=100 )
+curve(ftemp(x,temp=1), from = -25, to=25, add=T, col='red', n = 100000,lwd=2)
+
+```
+
+```{r}
+
+iter <- 10000
+theta_shell <- numeric(iter)
+theta_shell[1] <- 7
+
+set.seed(2)
+for(i in 2:iter){
+  theta_shell[i] <- vanilla_mh(log_target = log_target, 
+                               prop_var = 20^2,
+                               theta_curr = theta_shell[i-1])
+}
+
+par(mfrow=c(1,2))
+plot(theta_shell, type='l')
+plot(density(theta_shell), xlim=c(-25,25), ylim=c(0,.2), col='blue' )
+curve(ftemp(x,temp=1), from = -25, to=25, add=T, col='red', n = 100000,lwd=2)
+
+
+```
+
+```{r}
+
+iter <- 30000
+tempv <- c(1,100)
+prop_var <- c(20, 100^2) # one for each temperature (not necessary, but helps)
+
+n_temps <- length(tempv)
+temp_indx <- 1:n_temps
+
+theta_shell <- matrix(0, nrow=iter, ncol=n_temps)
+swap_shell <- matrix(nrow=iter, ncol=2)
+
+for( i in 2:iter){
+  
+  ## update chains (potentially in parallel )
+  for(t in temp_indx){
+    log_target <- function(x) log( ftemp(x, temp=tempv[t]) )
+    
+    theta_shell[i, t] <-  vanilla_mh(log_target = log_target, 
+                                     theta_curr = theta_shell[i-1, t],
+                                     prop_var=prop_var[t])
+  }
+  
+  ## propose swap, from swap_idx[1] (chain j) to swap_idx[2] (chain k)
+  swap_idx <- sample(temp_indx, 2, replace = F)
+  cj <- swap_idx[1]
+  ck <- swap_idx[2]
+  theta_j <- theta_shell[ i , cj]
+  theta_k <- theta_shell[ i , ck]
+  
+  
+  f1 <- tempv[cj]*( log_target( theta_j ) - log_target( theta_k ) )
+  f2 <- tempv[ck]*( log_target( theta_k ) -log_target( theta_j )  )
+  
+  accept_prob <- min( c(1, exp(f1 + f2) ) )
+    
+  if( rbinom(1,1, accept_prob)==1 ){
+    
+    ## make the swap
+    theta_shell[i, cj] <- theta_k
+    theta_shell[i, ck] <- theta_j
+    
+    ## record the swap
+    swap_shell[i, 1] <- cj
+    swap_shell[i, 2] <- ck
+    
+  }
+  
+}
+
+par(mfrow=c(1,2))
+plot(theta_shell[,2], type='l', col='gray')
+lines(theta_shell[,1], col='blue')
+
+plot(density(theta_shell[,1]), col='blue')
+curve(ftemp(x,temp=1), from = -40, to=40,ylim=c(0,.2), add=T, col='red', 
+      n = 100000,lwd=2)
+
+```
+

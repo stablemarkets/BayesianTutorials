@@ -21,17 +21,17 @@ k <- calc_k(ftemp, 100)
 
 ### log target distribution (ftemp with temp=1: ie untempered )
 log_target <- function(x) log(ftemp(x, temp=1))
-curve(ftemp(x,temp=1), from = -30, to=30, ylim=c(0,1))
+curve(ftemp(x,temp=1), from = -50, to=50, ylim=c(0,1), add=T)
 
 k <- calc_k(ftemp, 100)
 curve( (1/k)*ftemp(x,temp=100), from = -30, to=30, add=T, col='red')
 
-k <- calc_k(ftemp, 2)
-curve( (1/k)*ftemp(x,temp=20), from = -30, to=30, add=T, col='red')
+k <- calc_k(ftemp, 100)
+curve( (1/k)*ftemp(x,temp=100), from = -50, to=50, col='red')
 
 #### Run Vanilla Metropolis Hastings
 
-iter <- 1000
+iter <- 10000
 theta_shell <- numeric(iter)
 theta_shell[1] <- 1
 
@@ -47,8 +47,8 @@ curve(ftemp(x,temp=1), from = -40, to=40,ylim=c(0,1), add=T, col='red', n = 1000
 
 ## Parallel Tempering 
 
-iter <- 1000
-tempv <- c(1,20,60,100)
+iter <- 10000
+tempv <- c(1,200)
 
 n_temps <- length(tempv)
 temp_indx <- 1:n_temps
@@ -94,9 +94,21 @@ for( i in 2:iter){
 }
 
 par(mfrow=c(1,2))
-plot(theta_shell[,1], type='l')
+plot(theta_shell[,2], type='l', col='gray')
+lines(theta_shell[,1], col='black')
+
 hist(theta_shell[,1], breaks=100,freq = F)
 curve(ftemp(x,temp=1), from = -40, to=40,ylim=c(0,1), add=T, col='red', n = 100000,lwd=2)
+
+
+plot(theta_shell[,2], type='l')
+
+sm <- swap_shell[which(swap_shell[,1]==1 |swap_shell[,2]==1) ,]
+
+par(mfrow=c(1,1))
+plot(theta_shell[,1], type='l')
+points(1:iter, theta_shell[,1], pch=20, 
+       col=ifelse( (!is.na(swap_shell[,1]) & !is.na(swap_shell[,2])  ) & (swap_shell[,1]==1 | swap_shell[,2]==1), 'red', NA ) )
 
 
 hist(theta_shell[,2],breaks=100, freq=F)
