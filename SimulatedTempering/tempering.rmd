@@ -83,9 +83,9 @@ for( i in 2:iter){
 }
 ```
 
-```{r make_gif,  echo=F, warning=FALSE, message=FALSE, error=FALSE, cache=T, fig.show='animate', fig.width=12, interval=.25, fig.height=6, cache=FALSE, aniopts="loop", animation.hook='gifski', fig.align='center', eval=T}
+```{r make_gif,  echo=F, warning=FALSE, message=FALSE, error=FALSE, cache=T, fig.show='animate', fig.width=10, interval=.25, fig.height=5, cache=FALSE, aniopts="loop", animation.hook='gifski', fig.align='center', eval=T}
 
-for( i in 2:iter){
+for( i in seq(2,iter, 1)){
   par(mfrow=c(1,2))
   plot(theta_shell_no_switch[1:i,2], type='l', col='steelblue', 
        ylim=c(-50,50), xlim=c(0,iter), 
