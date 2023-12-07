@@ -1,7 +1,5 @@
 # Bayesian Tutorials
-Please cite/link when sharing. Thanks - Arman
-
-This repo hosts code behind the series of blog posts on [stablemarkets.wordpress.com](https://stablemarkets.wordpress.com) that walk through MCMC implementations for various classes of Bayesian models.
+This repo hosts code behind the series of blog posts on [stablemarkets.wordpress.com](https://stablemarkets.wordpress.com) that walk through MCMC implementations for various classes of Bayesian models. I wrote these in grad school as I was teaching myself Bayesian computation. I never felt like I truly understood something until I could implement it from scratch. The code is probably all very inefficient and perhaps even wrong, but is a kind of diary of my "from scratch" journey learning Bayes.
 
 In order of publication:
 1. [Bayesian Simple Linear Regression with Gibbs](https://stablemarkets.wordpress.com/2017/08/07/bayesian-simple-linear-regression-with-gibbs-sampling-in-r/)
